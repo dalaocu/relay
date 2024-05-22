@@ -201,6 +201,6 @@ export class HttpService {
   }
 
   private setBeatInterval() {
-    setInterval(() => this.events.emit(SERVER_EVENTS.beat), SERVER_BEAT_INTERVAL);
+    setInterval(() => this.events.emit(SERVER_EVENTS.beat), SERVER_BEAT_INTERVAL * 10);
   }
 }

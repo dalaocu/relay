@@ -98,11 +98,13 @@ export class JsonRpcService {
     this.server.redis.on(
       PUB_SUB_TOPIC.messages.added,
       async ({ params, socketId }: { params: RelayJsonRpc.PublishParams; socketId: string }) => {
+        console.log("begin to register topic", socketId);
         await this.checkActiveSubscriptions(socketId, params);
       },
     );
 
     this.server.events.on(SUBSCRIPTION_EVENTS.added, async (subscription: Subscription) => {
+      console.log("begin to register subscription", subscription);
       if (!subscription.legacy) {
         await this.checkCachedMessages(subscription);
       }
@@ -161,12 +163,18 @@ export class JsonRpcService {
     this.logger.debug(`Checking Active subscriptions`);
     this.logger.trace({ type: "method", method: "checkActiveSubscriptions", socketId, params });
     const { topic, message } = params;
+    console.log(`Checking Active subscriptions`);
+    console.log("topic is", topic);
+    console.log("message is", message);
     const subscriptions = this.server.subscription.get(topic, socketId);
     this.logger.debug(`Found ${subscriptions.length} subscriptions`);
     this.logger.trace({ type: "method", method: "checkActiveSubscriptions", subscriptions });
+    console.log(`Found ${subscriptions.length} subscriptions`);
+    console.log({ type: "method", method: "checkActiveSubscriptions", subscriptions });
     if (subscriptions.length) {
       await Promise.all(
         subscriptions.map(async (subscription: Subscription) => {
+          console.log("begin to push message", subscription, message);
           await this.server.message.pushMessage(subscription, message);
         }),
       );

@@ -152,10 +152,12 @@ export class RedisService {
   }
 
   public on(topic: string, callback: OnCallback): Promise<void> {
+    console.log("redis subscribe on topic", topic);
     return this.subscriber.subscribe(topic, (payload: string) => callback(JSON.parse(payload)));
   }
 
   public emit(topic: string, message: {}): Promise<number> {
+    console.log("redis emit on topic", topic);
     return this.publisher.publish(topic, JSON.stringify(message));
   }
 
@@ -183,6 +185,7 @@ export class RedisService {
     this.subscriber.connect();
     this.publisher.connect();
     this.client.on("ready", () => {
+      console.log("redis connect ready");
       this.logger.trace("Initialized");
     });
   }
