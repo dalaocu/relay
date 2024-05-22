@@ -62,18 +62,22 @@ export class HttpService {
   }
 
   public on(event: string, listener: any): void {
+    console.log("events.on");
     this.events.on(event, listener);
   }
 
   public once(event: string, listener: any): void {
+    console.log("events.once");
     this.events.once(event, listener);
   }
 
   public off(event: string, listener: any): void {
+    console.log("events.off");
     this.events.off(event, listener);
   }
 
   public removeListener(event: string, listener: any): void {
+    console.log("events.removeListener");
     this.events.removeListener(event, listener);
   }
 
@@ -93,6 +97,7 @@ export class HttpService {
       if (this.config.requiredParams.projectId) {
         assertType(req, "query", "object");
         assertType(req.query, "projectId");
+        console.log("validateProjectId req query is", req.query);
         // TODO: actually validate the ID when Cerbrus is available
       }
       return;
@@ -105,11 +110,15 @@ export class HttpService {
 
   public async validateAuth(req: FastifyRequest<GetWebsocketHandshakeRequest>, res: FastifyReply) {
     try {
+      console.log("validateAuth")
       const jwt = getAuthFromRequest(req);
-
+      console.log("jwt is ", jwt);
       if (typeof jwt === "undefined") return; // no jwt provided
-
-      if (await verifyJWT(jwt)) return; // jwt is valid
+      console.log("begin to verify jWT");
+      if (await verifyJWT(jwt)) {
+        console.log("verify OK");
+        return;
+      } // jwt is valid
 
       throw new HttpError("failed to validate the provided header", 401);
     } catch (e) {
@@ -125,6 +134,7 @@ export class HttpService {
     this.app.addHook(
       "preValidation",
       async (request: FastifyRequest<GetWebsocketHandshakeRequest>, reply: FastifyReply) => {
+        console.log("Request in preValidation:", request); 
         if (request.raw.url !== "/") return;
         await this.validateProjectId(request, reply);
         await this.validateAuth(request, reply);
@@ -158,6 +168,7 @@ export class HttpService {
         assertType(req, "body", "object");
         assertType(req.body, "topic");
         assertType(req.body, "webhook");
+        console.log("subscribe register", req.body);
 
         await this.notification.register(req.body.topic, req.body.webhook);
 

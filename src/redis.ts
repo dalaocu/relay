@@ -80,6 +80,12 @@ export class RedisService {
       method: "setNotification",
       notification,
     });
+    console.log(`Setting Notification`);
+    console.log({
+      type: "method",
+      method: "setNotification",
+      notification,
+    });
     const key = `notification:${notification.topic}`;
     await this.client.lPush(key, safeJsonStringify(notification));
     await this.client.lTrim(key, 0, REDIS_NOTIFICATION_MAX_SIZE - 1);
@@ -96,6 +102,13 @@ export class RedisService {
     }
     this.logger.debug(`Getting Notification`);
     this.logger.trace({
+      type: "method",
+      method: "getNotification",
+      topic,
+      notifications,
+    });
+    console.log(`Getting Notification`);
+    console.log({
       type: "method",
       method: "getNotification",
       topic,
