@@ -3,7 +3,7 @@ import { HttpServiceConfig } from "../types";
 
 const gitHash = process.env.GITHASH || "0000000";
 const version = require("../../package.json").version || "0.0.0";
-const logger = (process.env.LOG_LEVEL || "info").toLowerCase();
+const logger = (process.env.LOG_LEVEL || "trace").toLowerCase();
 
 if (SERVER_LOGGER.levels.indexOf(logger) === -1) {
   throw Error(
