@@ -58,19 +58,24 @@ export class SubscriptionService {
 
   private initialize(): void {
     this.logger.trace(`Initialized`);
+    console.log("subscription initailized");
     this.registerEventListeners();
   }
 
   private clearInactiveSubscriptions() {
-    this.subscriptions = this.subscriptions.filter((sub) =>
-      this.server.ws.isSocketConnected(sub.socketId),
-    );
+    console.log("clear inactive subscriptions:", this.subscriptions.length);
+    this.subscriptions = this.subscriptions.filter((sub) => {
+      console.log("sub socket id is", sub.socketId);
+      this.server.ws.isSocketConnected(sub.socketId);
+    });
   }
 
   private registerEventListeners() {
+    console.log("registerEventListeners");
     this.server.on(SERVER_EVENTS.beat, () => this.clearInactiveSubscriptions());
-    this.server.events.on(WEBSOCKET_EVENTS.close, (socketId: string) =>
-      this.removeSocket(socketId),
-    );
+    this.server.events.on(WEBSOCKET_EVENTS.close, (socketId: string) => {
+      console.log("websocket_close", socketId);
+      this.removeSocket(socketId);
+    });
   }
 }
