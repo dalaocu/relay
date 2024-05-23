@@ -49,8 +49,11 @@ export class NotificationService {
   }
 
   private registerEventListeners() {
-    this.server.events.on(JSONRPC_EVENTS.publish, async (params: RelayJsonRpc.PublishParams) =>
-      this.onNewMessage(params.topic, params.prompt),
+    console.log("notifications registerEventListeners")
+    this.server.events.on(JSONRPC_EVENTS.publish, async (params: RelayJsonRpc.PublishParams) => {
+      console.log("onNewMessage", params.topic);
+      this.onNewMessage(params.topic, params.prompt);
+    }
     );
   }
 }

@@ -92,6 +92,7 @@ export class WebSocketService {
       id: generateRandomBytes32(),
     };
     this.logger.debug({ type: "method", method: "addNewSocket", socket });
+    console.log({ type: "method", method: "addNewSocket", socket });
     this.sockets.set(socket.id, socket);
     return socket;
   }
@@ -126,6 +127,7 @@ export class WebSocketService {
   public async websocketHandler(fastify: FastifyInstance): Promise<void> {
     fastify.get<GetWebsocketHandshakeRequest>("/", { websocket: true }, (connection, req) => {
       const socket = this.addNewSocket(connection, req);
+      console.log("add new socket");
       connection.socket.on("message", async (data) => {
         this.messageHandler(data, socket.id);
       });

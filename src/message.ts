@@ -34,6 +34,8 @@ export class MessageService {
     const message = await this.server.redis.getMessage(
       redisMessageHash(params.topic, params.message),
     );
+    console.log("message set in redis", socketId);
+    console.log("message is", params.message);
     if (!message) {
       await this.server.redis.setMessage(params);
       this.server.redis.emit(PUB_SUB_TOPIC.messages.added, { params, socketId });
@@ -57,12 +59,15 @@ export class MessageService {
     );
 
     await this.server.redis.setPendingRequest(subscription.topic, request.id, message);
+    console.log("push message:", subscription.socketId);
+    console.log("SubscriptionParams:",request);
     const success = this.server.ws.send(subscription.socketId, request);
     if (success) this.setTimeout(subscription.socketId, request);
   }
 
   public async ackMessage(id: number): Promise<void> {
     const pending = await this.server.redis.getPendingRequest(id);
+    console.log("ackMessage", id, "pending?", pending);
     if (pending) {
       await this.server.redis.deletePendingRequest(id);
       this.deleteTimeout(id);

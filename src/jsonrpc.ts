@@ -34,8 +34,10 @@ export class JsonRpcService {
 
   public async onPayload(socketId: string, payload: JsonRpcPayload): Promise<void> {
     if (isJsonRpcRequest(payload)) {
+      console.log("json rpc request", socketId, payload);
       this.onRequest(socketId, payload);
     } else {
+      console.log("not json rpc request", socketId, payload);
       this.onResponse(socketId, payload);
     }
   }
@@ -44,11 +46,14 @@ export class JsonRpcService {
     try {
       this.logger.debug(`Incoming JSON-RPC Payload`);
       this.logger.debug({ type: "payload", direction: "incoming", payload: request, socketId });
+      console.log(`Incoming JSON-RPC Payload`);
+      console.log({ type: "payload", direction: "incoming", payload: request, socketId });
 
       switch (request.method) {
         case RELAY_JSONRPC.irn.publish:
         case RELAY_JSONRPC.waku.publish:
         case RELAY_JSONRPC.iridium.publish:
+          console.log("onPublishRequest:", socketId,  request as JsonRpcRequest<RelayJsonRpc.PublishParams>);
           await this.onPublishRequest(
             socketId,
             request as JsonRpcRequest<RelayJsonRpc.PublishParams>,
@@ -57,6 +62,7 @@ export class JsonRpcService {
         case RELAY_JSONRPC.irn.subscribe:
         case RELAY_JSONRPC.waku.subscribe:
         case RELAY_JSONRPC.iridium.subscribe:
+          console.log("onSubscribeRequest:", socketId,  request as JsonRpcRequest<RelayJsonRpc.SubscribeParams>);
           await this.onSubscribeRequest(
             socketId,
             request as JsonRpcRequest<RelayJsonRpc.SubscribeParams>,
@@ -65,12 +71,14 @@ export class JsonRpcService {
         case RELAY_JSONRPC.irn.unsubscribe:
         case RELAY_JSONRPC.waku.unsubscribe:
         case RELAY_JSONRPC.iridium.unsubscribe:
+          console.log("onUnsubscribeRequest:", socketId,  request as JsonRpcRequest<RelayJsonRpc.UnsubscribeParams>);
           await this.onUnsubscribeRequest(
             socketId,
             request as JsonRpcRequest<RelayJsonRpc.UnsubscribeParams>,
           );
           break;
         default:
+          console.log("METHOD_NOT_FOUND:", socketId,  request.id);
           this.server.ws.send(socketId, formatJsonRpcError(request.id, getError(METHOD_NOT_FOUND)));
           return;
       }
@@ -84,6 +92,8 @@ export class JsonRpcService {
   public async onResponse(socketId: string, response: JsonRpcResponse): Promise<void> {
     this.logger.info(`Incoming JSON-RPC Payload`);
     this.logger.debug({ type: "payload", direction: "incoming", payload: response, socketId });
+    console.info(`Incoming JSON-RPC Payload`);
+    console.log({ type: "payload", direction: "incoming", payload: response, socketId });
     await this.server.message.ackMessage(response.id);
   }
 
@@ -113,9 +123,12 @@ export class JsonRpcService {
 
   private async onPublishRequest(socketId: string, request: JsonRpcRequest) {
     const params = parsePublishRequest(request);
+    console.log("onPublishRequest params", params);
+    console.log("publish socket id is", socketId);
     const maxTTL = this.server.config.maxTTL;
     if (params.ttl > maxTTL) {
       const errorMessage = `requested ttl is above ${maxTTL} seconds`;
+      console.log(errorMessage);
       this.logger.error(errorMessage);
       this.server.ws.send(
         socketId,
@@ -127,6 +140,7 @@ export class JsonRpcService {
     this.logger.trace({ type: "method", method: "onPublishRequest", socketId, params });
     await this.server.message.setMessage(params, socketId);
     this.server.ws.send(socketId, formatJsonRpcResult(request.id, true));
+    console.log("jsonrpc_publish emit");
     this.server.events.emit(JSONRPC_EVENTS.publish, params, socketId);
   }
 
@@ -134,6 +148,8 @@ export class JsonRpcService {
     const params = parseSubscribeRequest(request);
     this.logger.debug(`Subscribe Request Received`);
     this.logger.trace({ type: "method", method: "onSubscribeRequest", socketId, params });
+    console.log(`Subscribe Request Received`);
+    console.log({ type: "method", method: "onSubscribeRequest", socketId, params });
 
     const jsonrpcMethod =
       request.method === RELAY_JSONRPC.iridium.subscribe
@@ -154,6 +170,9 @@ export class JsonRpcService {
     const params = parseUnsubscribeRequest(request);
     this.logger.debug(`Unsubscribe Request Received`);
     this.logger.trace({ type: "method", method: "onUnsubscribeRequest", socketId, params });
+    console.log(`Unsubscribe Request Received`);
+    console.log({ type: "method", method: "onUnsubscribeRequest", socketId, params });
+    console.log("subscription remove", params.id);
     this.server.subscription.remove(params.id);
     this.server.ws.send(socketId, formatJsonRpcResult(request.id, true));
     this.server.events.emit(JSONRPC_EVENTS.unsubscribe, params.id);
@@ -185,9 +204,13 @@ export class JsonRpcService {
     const { socketId } = subscription;
     this.logger.debug(`Checking Cached Messages`);
     this.logger.trace({ type: "method", method: "checkCachedMessages", socketId });
+    console.log(`Checking Cached Messages`);
+    console.log({ type: "method", method: "checkCachedMessages", socketId });
     const messages = await this.server.message.getMessages(subscription.topic);
     this.logger.debug(`Found ${messages.length} cached messages`);
     this.logger.trace({ type: "method", method: "checkCachedMessages", messages });
+    console.log(`Found ${messages.length} cached messages`);
+    console.log({ type: "method", method: "checkCachedMessages", messages });
     if (messages && messages.length) {
       await Promise.all(
         messages.map(async (message: string) => {
