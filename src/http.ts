@@ -134,7 +134,7 @@ export class HttpService {
     this.app.addHook(
       "preValidation",
       async (request: FastifyRequest<GetWebsocketHandshakeRequest>, reply: FastifyReply) => {
-        console.log("Request in preValidation:", request); 
+        console.log("Request in preValidation:"); 
         if (request.raw.url !== "/") return;
         await this.validateProjectId(request, reply);
         await this.validateAuth(request, reply);
