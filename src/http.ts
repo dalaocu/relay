@@ -62,22 +62,22 @@ export class HttpService {
   }
 
   public on(event: string, listener: any): void {
-    console.log("events.on");
+    console.log("HttpService events.on");
     this.events.on(event, listener);
   }
 
   public once(event: string, listener: any): void {
-    console.log("events.once");
+    console.log("HttpService events.once");
     this.events.once(event, listener);
   }
 
   public off(event: string, listener: any): void {
-    console.log("events.off");
+    console.log("HttpService events.off");
     this.events.off(event, listener);
   }
 
   public removeListener(event: string, listener: any): void {
-    console.log("events.removeListener");
+    console.log("HttpService events.removeListener");
     this.events.removeListener(event, listener);
   }
 

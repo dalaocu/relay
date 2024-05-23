@@ -63,7 +63,7 @@ export class SubscriptionService {
   }
 
   private clearInactiveSubscriptions() {
-    console.log("clear inactive subscriptions:", this.subscriptions.length);
+    console.log("subscription.ts clear inactive subscriptions:", this.subscriptions.length);
     this.subscriptions = this.subscriptions.filter((sub) => {
       console.log("sub socket id is", sub.socketId);
       this.server.ws.isSocketConnected(sub.socketId);
@@ -71,7 +71,7 @@ export class SubscriptionService {
   }
 
   private registerEventListeners() {
-    console.log("registerEventListeners");
+    console.log("subscription.ts registerEventListeners");
     this.server.on(SERVER_EVENTS.beat, () => this.clearInactiveSubscriptions());
     this.server.events.on(WEBSOCKET_EVENTS.close, (socketId: string) => {
       console.log("websocket_close", socketId);
